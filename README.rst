@@ -2,7 +2,7 @@
 Pynamite
 ========
 ----------------------------------------------
-Python library for making dynamic presntations
+Python library for making dynamic presentations
 ----------------------------------------------
 
 Overview
