@@ -30,7 +30,6 @@ class ActionList():
     def process(self):
         raise NotImplemented()
     def __call__(self):
-        print "Call ActionList"
         self.done = False
         self.current_action = 0
         for i in range(len(self.actions)):
@@ -75,7 +74,6 @@ class serial(ActionList):
                     else:
                         # just call the untimed action
                         a()
-                    print "Started",a
                 if not a.done:
                     # must break and come back
                     break
@@ -84,11 +82,9 @@ class serial(ActionList):
                 self.play.queue_draw()
             self.current_action = i
             
-            if self.current_action >= len(self.actions):
-                print "Serial done"
+            if self.current_action+1 >= len(self.actions) and \
+                    self.actions[self.current_action].done:
                 self.done = True
-            else:
-                print self.current_action, len(self.actions), self.actions[self.current_action] 
                 
 class Action(object):
     """
@@ -100,10 +96,6 @@ class Action(object):
         self.play = play
         self.actor = actor
         self.var = var
-        if start_val is None:
-            # get it from the current var
-            #start_val = var
-            start_val = getattr(actor,var)
         self.start_val = start_val
         self.end_val = end_val
         self.duration = duration
@@ -128,6 +120,10 @@ class Action(object):
             self.done = False
 
     def __call__(self, start_time):
+        if self.start_val is None:
+            # get it from the current var
+            #start_val = var
+            self.start_val = getattr(self.actor,self.var)
         self.done = False
         self.start_time = start_time
         self.play._do_action(self)
@@ -177,5 +173,6 @@ class Set():
     def __call__(self):
         self.done = False
         setattr(self.actor,self.var,self.val)
+        print "set",self.actor,self.var,"to",self.val
         self.started = True
         self.done = True

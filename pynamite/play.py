@@ -361,3 +361,27 @@ if __name__ == "__main__":
     myplay.run()
 
 
+
+# class MyPlay(Play):
+
+#     def __init__():
+#         self.add_scenes([self.title_scene, self.next_scene])
+
+#     def title_scene(self):
+#         x = TextBox(self)
+#         x.enter()
+#         x.pause()
+
+#         self.sel('.textbox').fadeIn().pause()
+
+#         def fade1(self):
+#             x.fadeout()
+
+#         def fade2(self):
+#             y.fadeout()
+
+#         self.in_parallel(fade1, fade2)
+
+
+# play = MyPlay()
+# play.run()
