@@ -16,9 +16,9 @@ smooth = global_play.smooth
 
 # serial/parallel
 parallel = global_play.parallel
-serial = global_play.parallel
+serial = global_play.serial
 in_parallel = global_play.in_parallel
-in_serial = global_play.in_parallel
+in_serial = global_play.in_serial
 
 # run it
 add_scene = global_play.add_scene

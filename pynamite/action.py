@@ -82,8 +82,7 @@ class serial(ActionList):
                 self.play.queue_draw()
             self.current_action = i
             
-            if self.current_action+1 >= len(self.actions) and \
-                    self.actions[self.current_action].done:
+            if self.actions[-1].done:
                 self.done = True
                 
 class Action(object):
