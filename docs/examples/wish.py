@@ -2,31 +2,24 @@
 # My wish for Pynamite
 #
 
-from pynamite.play import Play
-
-# set up your scenes
-scenes = []
+from actor import TextBox
 
 def scene1():
-    pass
-scenes.append(scene1)
-
-
-def scene2():
-    # set up the actors
-    a = TextBox("one")
-    b = TextBox("two")
-    # tell them what to do
-    with parallel():
-        # start at same time
-        fade_in([a],1.0)
-        fade_in([b],2.0)
+    x = TextBox("Pynamite")
+    y = TextBox("Rocks!!!")
+    enter(x)
     pause()
-    
-               
-scenes.append(scene2)
+    with parallel():
+        fadeout(1.0,x)
+        fadein(1.0,y)
+    pause()
+    fadeout(1.0,y)
+    pause()
 
+def scene2(p):
+    x = TextBox("Yes, it Rocks!!!")
+    fadein(1.0,x)
+    pause()
+    leave()
 
-# Put on the play
-myplay = Play(800,600,scenes=scenes)
-myplay.show()
+run()

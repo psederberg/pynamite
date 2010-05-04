@@ -47,7 +47,8 @@ class Screen( gtk.DrawingArea ):
         pass
 
 class Play(Screen):
-    def __init__ ( self, width, height, scenes=None, speed=20 ):
+    def __init__ ( self, width, height, scenes=None,
+                   action_speed=20 ):
         self.width = width
         self.height = height
         Screen.__init__( self, width, height )
@@ -61,7 +62,7 @@ class Play(Screen):
         self._active_actions = []
         self._active_action_lists = []
 
-        self._action_speed = speed
+        self._action_speed = action_speed
 
         self._paused = False
 
@@ -79,8 +80,6 @@ class Play(Screen):
             self._show_scenes(self._current_scene)
         self._current_scene += 1
 
-        # recursive
-        #self._show()
 
     def _show_scenes(self,s):
         for s in range(s,len(self._scenes)):
@@ -88,20 +87,8 @@ class Play(Screen):
             self._scenes[s]()
             while not self._scenes[s].done:
                 self._process_events()
-                
-            # for a in self._scenes[s]:
-            #     for i in range(len(a)):
-            #         actions = []
-            #         if isinstance(a[i],Action):
-            #             # loop over each one and do it in parallel
-            #             actions.append(a[i])
-            #         else:
-            #             # call it
-            #             a[i]()
-            #     if len(actions) > 0:
-            #         self._do_actions(actions)
-            #     self.queue_draw()
-                
+
+                                
     def on_key_press_event (self, widget, event):
         keyname = gtk.gdk.keyval_name(event.keyval)
         print event.hardware_keycode, event.keyval, keyname
@@ -149,24 +136,14 @@ class Play(Screen):
 
     def enter(self, *actors):
         self._actions[-1].add_action(Enter(self,*actors))
-        # self._new_action.append(Enter(self,*actors))
-        # if not self._in_parallel:
-        #     self._new_scene.append(self._new_action)
-        #     self._new_action = []
         
     def _do_enter(self, *actors):
         """
         """
         self._actors.extend(actors)
-        # make sure to redraw
-        #self.queue_draw()
 
     def leave(self, *actors):
         self._actions[-1].add_action(Leave(self,*actors))
-        # self._new_action.append(Leave(self,*actors))
-        # if not self._in_parallel:
-        #     self._new_scene.append(self._new_action)
-        #     self._new_action = []
 
     def _do_leave(self, *actors):
         if len(actors) == 0:
@@ -176,8 +153,6 @@ class Play(Screen):
             for a in actors:
                 if a in self._actors:
                     self._actors.remove(a)
-        # make sure to redraw
-        #self.queue_draw()
 
     def set_var(self, actor, var, val):
         self._actions[-1].add_action(Set(self,actor,
@@ -192,14 +167,6 @@ class Play(Screen):
                                             end_val=end_val,
                                             duration=duration,
                                             func=_smooth))
-        # self._new_action.append(Action(self,actor,var,
-        #                                start_val=start_val,
-        #                                end_val=end_val,
-        #                                duration=duration,
-        #                                func=_smooth))
-        # if not self._in_parallel:
-        #     self._new_scene.append(self._new_action)
-        #     self._new_action = []
 
     def linear(self, actor, var,
                start_val=None, end_val=None,
@@ -209,14 +176,6 @@ class Play(Screen):
                                             end_val=end_val,
                                             duration=duration,
                                             func=_linear))
-        # self._new_action.append(Action(self,actor,var,
-        #                                start_val=start_val,
-        #                                end_val=end_val,
-        #                                duration=duration,
-        #                                func=_linear))
-        # if not self._in_parallel:
-        #     self._new_scene.append(self._new_action)
-        #     self._new_action = []
 
     def fadein(self, duration, *actors):
         with serial(self):
@@ -248,7 +207,7 @@ class Play(Screen):
         self._active_action_lists.append(action_list)
 
         if start_timer:
-            gobject.timeout_add(self._action_speed,
+            gobject.timeout_add(self._action_list_speed,
                                 self._process_active_action_lists)
 
     def _process_active_action_lists(self):
@@ -320,10 +279,6 @@ class Play(Screen):
     
     def pause(self):
         self._actions[-1].add_action(Pause(self))
-        # self._new_action.append(Pause(self))
-        # if not self._in_parallel:
-        #     self._new_scene.append(self._new_action)
-        #     self._new_action = []
         
     def _do_pause(self):
         # we're paused
@@ -364,10 +319,18 @@ if __name__ == "__main__":
 
 # class MyPlay(Play):
 
-#     def __init__():
-#         self.add_scenes([self.title_scene, self.next_scene])
+#     def scene1(self):
+#         x = TextBox("Pynamite")
+#         y = TextBox("Rocks!!!")
+#         self.enter(x)
+#         self.pause()
+#         with self.parallel():
+#             self.fadeout(1.0,x)
+#             self.fadein(1.0,y)
+#         self.pause()
+#         self.fadeout(1.0,y)
+#         self.pause()
 
-#     def title_scene(self):
 #         x = TextBox(self)
 #         x.enter()
 #         x.pause()
@@ -383,5 +346,5 @@ if __name__ == "__main__":
 #         self.in_parallel(fade1, fade2)
 
 
-# play = MyPlay()
+# play = MyPlay().run()
 # play.run()
