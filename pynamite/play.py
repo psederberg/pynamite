@@ -131,7 +131,7 @@ class Play(Screen):
     def add_scene(self, scene):
         self._actions = []
         with serial(self):
-            scene(self)
+            scene()
         self._scenes.append(self._actions.pop())
 
     def enter(self, *actors):
@@ -197,6 +197,18 @@ class Play(Screen):
             self.leave(*actors)
 
 
+    def serial(self):
+        return serial(self)
+    def parallel(self):
+        return parallel(self)
+
+    def in_parallel(self, func):
+        with parallel(self):
+            func()
+    def in_serial(self, func):
+        with serial(self):
+            func()
+    
     def _do_action_list(self, action_list):
         if len(self._active_action_lists) > 0:
             start_timer = False
@@ -207,7 +219,7 @@ class Play(Screen):
         self._active_action_lists.append(action_list)
 
         if start_timer:
-            gobject.timeout_add(self._action_list_speed,
+            gobject.timeout_add(self._action_speed,
                                 self._process_active_action_lists)
 
     def _process_active_action_lists(self):

@@ -173,6 +173,5 @@ class Set():
     def __call__(self):
         self.done = False
         setattr(self.actor,self.var,self.val)
-        print "set",self.actor,self.var,"to",self.val
         self.started = True
         self.done = True
