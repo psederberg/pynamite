@@ -5,9 +5,15 @@ import cairo
 
 from math import pi, sqrt
 
+from play import global_play
+from action import Set
+
 class Actor(object):
     """
     """
+    play = global_play
+    opacity = 1.0
+    
     def __init__(self):
         self.rect = None
 
@@ -16,6 +22,10 @@ class Actor(object):
         """
         pass
 
+    # wrap setting of vars in actions
+    def set_opacity(self, val, duration=0.0,func="linear"):
+        self.play.add_action(Set(self,"opacity",val,
+                                 duration=duration, func=func))
 
 class Stuff(Actor):
     def _draw(self, cr, t=None):
@@ -42,7 +52,6 @@ class TextBox(Actor):
         super( TextBox, self ).__init__( )
 
         self.text = text
-        self.opacity = 1.0
         
     def _draw(self, cr, t=None):
 

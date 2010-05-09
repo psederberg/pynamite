@@ -8,11 +8,6 @@ from gtk import gdk
 from math import pi, sqrt
 import time
 
-from action import Action, Enter, Leave, Pause, Set
-from action import ActionList, parallel, serial
-from action import _linear, _smooth
-
-
 class Screen( gtk.DrawingArea ):
     """ This class is a Drawing Area"""
     def __init__( self, w, h ):
@@ -60,13 +55,15 @@ class Play(Screen):
 
         self._actors = []
         self._active_actions = []
-        self._active_action_lists = []
-
         self._action_speed = action_speed
 
         self._paused = False
 
         self._show_started = False
+
+        # start the action timer
+        gobject.timeout_add( self._action_speed,
+                             self._process_active_actions)
 
     def _show(self, start_scene=None):
         if not start_scene is None:
@@ -78,13 +75,13 @@ class Play(Screen):
         # call the current scene
         if self._current_scene < len(self._scenes):
             self._show_scenes(self._current_scene)
-        self._current_scene += 1
 
 
     def _show_scenes(self,s):
         for s in range(s,len(self._scenes)):
             print "Scene %d" % s
-            self._scenes[s]()
+            self._current_scene = s
+            self._scenes[s](time.time())
             while not self._scenes[s].done:
                 self._process_events()
 
@@ -102,7 +99,6 @@ class Play(Screen):
                 self._show_started = True
                 self._show()
         elif event.hardware_keycode in [36]:
-            print self._active_action_lists
             print self._active_actions
         elif event.hardware_keycode in [111,113]:
             # go back to previous slide
@@ -119,6 +115,7 @@ class Play(Screen):
         cr.set_source_rgb(0, 1, 1)
         cr.fill()
 
+        # no all the actors
         for a in self._actors:
             # just draw it
             a._draw(cr)
@@ -128,24 +125,18 @@ class Play(Screen):
             gtk.main_iteration(False)
         time.sleep(sleep)
 
-    def add_scene(self, scene):
-        self._actions = []
-        with serial(self):
-            scene()
+    def add_scene(self):
         self._scenes.append(self._actions.pop())
 
+    def add_action(self, action):
+        self._actions[-1].add_action(action)
+
     def enter(self, *actors):
-        self._actions[-1].add_action(Enter(self,*actors))
-        
-    def _do_enter(self, *actors):
         """
         """
         self._actors.extend(actors)
 
     def leave(self, *actors):
-        self._actions[-1].add_action(Leave(self,*actors))
-
-    def _do_leave(self, *actors):
         if len(actors) == 0:
             # remove them all
             self._actors = []
@@ -154,150 +145,42 @@ class Play(Screen):
                 if a in self._actors:
                     self._actors.remove(a)
 
-    def set_var(self, actor, var, val):
-        self._actions[-1].add_action(Set(self,actor,
-                                         var, val))
-        
-
-    def smooth(self, actor, var,
-               start_val=None, end_val=None,
-               duration=1.0):
-        self._actions[-1].add_action(Action(self,actor,var,
-                                            start_val=start_val,
-                                            end_val=end_val,
-                                            duration=duration,
-                                            func=_smooth))
-
-    def linear(self, actor, var,
-               start_val=None, end_val=None,
-               duration=1.0):
-        self._actions[-1].add_action(Action(self,actor,var,
-                                            start_val=start_val,
-                                            end_val=end_val,
-                                            duration=duration,
-                                            func=_linear))
-
-    def fadein(self, duration, *actors):
-        with serial(self):
-            for actor in actors:
-                self.set_var(actor, "opacity", 0.0)
-            self.enter(*actors)
-            with parallel(self):
-                for actor in actors:
-                    self.linear(actor, "opacity", end_val=1.0,
-                                duration=duration)
-
-    def fadeout(self, duration, *actors):
-        with serial(self):
-            with parallel(self):
-                for actor in actors:
-                    self.linear(actor, "opacity", end_val=0.0,
-                                duration=duration)
-            
-            self.leave(*actors)
-
-
-    def serial(self):
-        return serial(self)
-    def parallel(self):
-        return parallel(self)
-
-    def in_parallel(self, func):
-        with parallel(self):
-            func()
-    def in_serial(self, func):
-        with serial(self):
-            func()
-    
-    def _do_action_list(self, action_list):
-        if len(self._active_action_lists) > 0:
-            start_timer = False
-        else:
-            start_timer = True
-
-        # add it to the list
-        self._active_action_lists.append(action_list)
-
-        if start_timer:
-            gobject.timeout_add(self._action_speed,
-                                self._process_active_action_lists)
-
-    def _process_active_action_lists(self):
-        """
-        """
-        to_remove = []
-        for i,al in enumerate(self._active_action_lists):
-            al.process()
-            if al.done:
-                to_remove.append(i)
-        
-        # remove the done ones
-        to_remove.reverse()
-        for i in to_remove:
-            self._active_action_lists.pop(i)
-
-        # see if keep going
-        if len(self._active_action_lists) == 0:
-            return False
-        else:
-            # keep going
-            return True
-
-
-    def _do_action(self, action):
-        # Go call tick every X ms.
-        if len(self._active_actions) > 0:
-            start_timer = False
-        else:
-            start_timer = True
-
-        # add it to the active actions
-        self._active_actions.append(action)
-
-        if start_timer:
-            gobject.timeout_add( self._action_speed,
-                                 self._process_active_actions)
-
-
-    def _process_active_actions(self):
-        """
-        """
-        cur_time = time.time()
-        to_remove = []
-        for i,action in enumerate(self._active_actions):
-            # set the actor's current value
-            action.set_var(cur_time)
-            if action.done:
-                # set to remove it from the active list
-                to_remove.append(i)
-
-        # make sure to draw after updating all the actors
-        self.queue_draw()
-
-        # remove the done ones
-        to_remove.reverse()
-        for i in to_remove:
-            self._active_actions.pop(i)
-
-        # see if keep going
-        if len(self._active_actions) == 0:
-            return False
-        else:
-            # keep going
-            return True
-        
     def wait(self):
         pass
     
     def pause(self):
-        self._actions[-1].add_action(Pause(self))
-        
-    def _do_pause(self):
         # we're paused
         self._paused = True
         while self._paused:
             self._process_events()
         #raw_input()
+
+    def _process_active_actions(self):
+        """
+        """
+        if len(self._active_actions) > 0:
+            cur_time = time.time()
+            to_remove = []
+            for i,action in enumerate(self._active_actions):
+                # set the actor's current value
+                action(cur_time)
+                if action.done:
+                    # set to remove it from the active list
+                    to_remove.append(i)
+
+            # make sure to draw after updating all the actors
+            self.queue_draw()
+
+            # remove the done ones
+            to_remove.reverse()
+            for i in to_remove:
+                self._active_actions.pop(i)
+
+        # keep going
+        return True
+        
+# set up global play instance
+global_play = Play(800,600)
 
 
 if __name__ == "__main__":
