@@ -13,7 +13,7 @@ def _smooth(start_val, end_val, duration, t):
     return (end_val-start_val)*(3*(t/duration)**2-2*(t/duration)**3) + start_val
 
 _interp_func = {"linear": _linear,
-             "smooth": _smooth}
+                "smooth": _smooth}
 
 class Action(object):
     """
@@ -38,6 +38,9 @@ class Action(object):
             if not self.done:
                 # add it to the active actions until done
                 self.play._active_actions.append(self)
+            else:
+                # it's done, so ensure drawing
+                self.play.queue_draw()
 
 class Set(Action):
     def __init__(self,actor,var,val,duration=0.0,func="linear"):
@@ -54,7 +57,7 @@ class Set(Action):
             setattr(self.actor,self.var,self.end_val)
             self.done = True
         else:
-            if t==0:
+            if t==0.0:
                 self.start_val = getattr(self.actor,self.var)
             # eventually use this
             # self.var = self.func(self.start_val,
@@ -65,7 +68,32 @@ class Set(Action):
                               self.end_val,
                               self.duration, t))
             #self.done = False
-        
+
+def linear(actor, var, val, duration=1.0):
+    global_play.add_action(Set(actor,var,val,
+                               duration=duration,
+                               func="linear"))
+def smooth(actor, var, val, duration=1.0):
+    global_play.add_action(Set(actor,var,val,
+                               duration=duration,
+                               func="smooth"))
+
+# classes for property setting
+class set_to(object):
+    def __init__(self, val, duration=1.0, func="linear"):
+        self.val = val
+        self.duration = duration
+        self.func = func
+class smooth_to(set_to):
+    def __init__(self, val, duration=1.0):
+        self.val = val
+        self.duration = duration
+        self.func = "smooth"
+class linear_to(set_to):
+    def __init__(self, val, duration=1.0):
+        self.val = val
+        self.duration = duration
+        self.func = "linear"
 
 class ActionList(Action):
     def __init__(self):
@@ -99,7 +127,7 @@ class parallel(ActionList):
         self.done = all(done)
 
         # make sure to queue the drawing
-        self.play.queue_draw()
+        #self.play.queue_draw()
 
 class serial(ActionList):
     def _process(self, cur_time):
@@ -114,7 +142,8 @@ class serial(ActionList):
                 break
 
             # make sure to queue the drawing
-            self.play.queue_draw()
+            #self.play.queue_draw()
+            
         # update the current action
         self.current_action = i
 
@@ -151,18 +180,21 @@ def pause():
 def fadein(duration, *actors):
     with serial():
         for actor in actors:
-            actor.set_opacity(0.0)
+            #actor.set_opacity(0.0)
+            actor.opacity = 0.0
         enter(*actors)
         with parallel():
             for actor in actors:
-                actor.set_opacity(1.0, duration=duration, func="linear")
+                #actor.set_opacity(1.0, duration=duration, func="linear")
+                actor.opacity = linear_to(1.0, duration=duration)
 
 
 def fadeout(duration, *actors):
     with serial():
         with parallel():
             for actor in actors:
-                actor.set_opacity(0.0, duration=duration, func="linear")
+                #actor.set_opacity(0.0, duration=duration, func="linear")
+                actor.opacity = linear_to(0.0, duration=duration)
         leave(*actors)
 
 def add_scene(scene):

@@ -15,8 +15,7 @@ def true_wish():
     g = Group(x,y)
 
     # set some starting opacities
-    x.set_opacity(0.0)
-    y.set_opacity(1.0)
+    g.opacity = 0.0
 
     # bring out the group
     g.enter()
@@ -24,8 +23,8 @@ def true_wish():
     # fade in and out at same time, while showing fire
     with parallel():
         # smooth takes start, end, and duration
-        x.set_opacity(.5,duration=2.0,style=SMOOTH)
-        y.set_opacity(.5,duration=2.0,style=SMOOTH)
+        x.opacity = smooth_to(.5,duration=2.0)
+        y.opacity = smooth_to(.5,duration=2.0)
         # the flame can burn
         with serial():
             # enter the flame

@@ -7,25 +7,59 @@ from math import pi, sqrt
 
 from play import global_play
 from action import Set, enter, leave, fadein, fadeout
+from action import set_to, smooth_to, linear_to
+
+def make_property(obj, var, doc=""):
+    prop = property(lambda obj: getattr(obj,"_"+var),
+                    lambda obj,value: \
+                    isinstance(value,set_to) and \
+                    obj.play.add_action(Set(obj,"_"+var,value.val,
+                                            duration=value.duration,
+                                            func=value.func)) or \
+                    obj.play.add_action(Set(obj,"_opacity",value,
+                                            duration=0.0,
+                                            func="linear")),
+                    doc=doc)
+    return prop
+                    
 
 class Actor(object):
     """
     """
     play = global_play
-    opacity = 1.0
+
+    _opacity = 1.0
+        
     cx = .5
     cy = .5
     
     def __init__(self):
         self.rect = None
+        
+    def get_opacity(self):
+        return self._opacity
+    def set_opacity(self, value):
+        if isinstance(value,set_to):
+            self.play.add_action(Set(self,"_opacity",value.val,
+                                     duration=value.duration,
+                                     func=value.func))
+        else:
+            self.play.add_action(Set(self,"_opacity",value,
+                                     duration=0.0,
+                                     func="linear"))
 
+    opacity = property(get_opacity, set_opacity,
+                       doc="Opacity of the actor.")
+    # opacity = make_property(self,"opacity",
+    #                         doc="Opacity of the actor.")
+    
     def _draw(self,cr,t=None):
         """
         """
         raise NotImplemented()
 
     # wrap setting of vars in actions
-    def set_opacity(self, val, duration=0.0,func="linear"):
+    def set_opacity_old(self, val, duration=0.0,func="linear"):
         self.play.add_action(Set(self,"opacity",val,
                                  duration=duration, func=func))
 
@@ -48,6 +82,7 @@ class Actor(object):
 
     def fadeout(self, duration):
         fadeout(duration, self)
+
 
 
 class Stuff(Actor):

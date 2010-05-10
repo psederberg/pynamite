@@ -27,15 +27,15 @@ def scene1():
         y.set_cy(.5,duration=2.0,func="smooth")
         fadeout(1.0,x)
 
-    # wait for intput
+    # wait for input
     pause()
 
     # last actor leaves
     with parallel():
         fadeout(2.0,y)
-        y.set_cx(1.0,duration=2.0,func="smooth")
-        y.set_cy(1.0,duration=2.0,func="smooth")
-           
+        y.set_cx(1.0,duration=2.0,func="linear")
+        y.set_cy(1.0,duration=2.0,func="linear")
+    
     pause()
 # add that scene to the play
 add_scene(scene1)
@@ -45,17 +45,24 @@ def scene2():
     x = TextBox("Yes, it Rocks!!!")
     
     # set its opacity to 0.0
-    x.set_opacity(0.0)
+    #x.set_opacity(0.0)
+    x.opacity = 0.0
     
     # have it enter (but remember it's still not visible)
     x.enter()
     
     # have it become visible, but in a fancy way
-    x.set_opacity(.5, duration=.5, func="smooth")
-    x.set_opacity(.25, duration=.25, func="smooth")
-    x.set_opacity(.75, duration=.5, func="smooth")
-    x.set_opacity(.5, duration=.25, func="smooth")
-    x.set_opacity(1.0, duration=.5, func="smooth")
+    # x.set_opacity(.5, duration=.5, func="smooth")
+    # x.set_opacity(.25, duration=.25, func="smooth")
+    # x.set_opacity(.75, duration=.5, func="smooth")
+    # x.set_opacity(.5, duration=.25, func="smooth")
+    # x.set_opacity(1.0, duration=.5, func="smooth")
+
+    x.opacity = smooth_to(.5, duration=.5)
+    x.opacity = smooth_to(.25, duration=.25)
+    x.opacity = smooth_to(.75, duration=.5)
+    x.opacity = smooth_to(.5, duration=.25)
+    x.opacity = smooth_to(1.0, duration=.5)
 
     # wait for input
     pause()

@@ -43,7 +43,7 @@ class Screen( gtk.DrawingArea ):
 
 class Play(Screen):
     def __init__ ( self, width, height, scenes=None,
-                   action_speed=20 ):
+                   action_speed=25 ):
         self.width = width
         self.height = height
         Screen.__init__( self, width, height )
