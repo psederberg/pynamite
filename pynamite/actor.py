@@ -6,13 +6,15 @@ import cairo
 from math import pi, sqrt
 
 from play import global_play
-from action import Set
+from action import Set, enter, leave, fadein, fadeout
 
 class Actor(object):
     """
     """
     play = global_play
     opacity = 1.0
+    cx = .5
+    cy = .5
     
     def __init__(self):
         self.rect = None
@@ -20,12 +22,33 @@ class Actor(object):
     def _draw(self,cr,t=None):
         """
         """
-        pass
+        raise NotImplemented()
 
     # wrap setting of vars in actions
     def set_opacity(self, val, duration=0.0,func="linear"):
         self.play.add_action(Set(self,"opacity",val,
                                  duration=duration, func=func))
+
+    def set_cx(self, val, duration=0.0,func="linear"):
+        self.play.add_action(Set(self,"cx",val,
+                                 duration=duration, func=func))
+
+    def set_cy(self, val, duration=0.0,func="linear"):
+        self.play.add_action(Set(self,"cy",val,
+                                 duration=duration, func=func))
+
+    def enter(self):
+        enter(self)
+
+    def leave(self):
+        leave(self)
+
+    def fadein(self, duration):
+        fadein(duration, self)
+
+    def fadeout(self, duration):
+        fadeout(duration, self)
+
 
 class Stuff(Actor):
     def _draw(self, cr, t=None):
@@ -64,8 +87,8 @@ class TextBox(Actor):
         fascent, fdescent, fheight, fxadvance, fyadvance = cr.font_extents()
         xbearing, ybearing, width, height, xadvance, yadvance = \
                 cr.text_extents(self.text)
-        x = 0.5 - xbearing - width / 2
-        y = 0.5 - fdescent + fheight / 2
+        x = self.cx - xbearing - width / 2
+        y = self.cy - fdescent + fheight / 2
 
         # text
         cr.move_to(x, y)
