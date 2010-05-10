@@ -42,6 +42,7 @@ class Action(object):
                 # it's done, so ensure drawing
                 self.play.queue_draw()
 
+
 class Set(Action):
     def __init__(self,actor,var,val,duration=0.0,func="linear"):
         self.actor = actor
@@ -171,11 +172,25 @@ def leave(*actors):
 
 class Pause(Action):
     def _process(self, cur_time):
-        self.play.pause()
-        self.done = True
+        if self.start_time == cur_time:
+            self.play._paused = True
+        elif not self.play._paused:
+            self.done = True
+
+        #self.play.pause()
+        #self.done = True
 def pause():
     global_play.add_action(Pause())
 
+class Wait(Action):
+    def __init__(self, duration):
+        self.duration = duration        
+    def _process(self, cur_time):
+        t = cur_time - self.start_time
+        if t >= self.duration:
+            self.done = True
+def wait(duration):
+    global_play.add_action(Wait(duration))
 
 def fadein(duration, *actors):
     with serial():

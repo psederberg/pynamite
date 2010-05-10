@@ -7,5 +7,5 @@ run = global_play.run
 
 # set up actions
 from action import enter, leave, pause, parallel, serial
-from action import fadein, fadeout, add_scene
+from action import fadein, fadeout, wait, add_scene
 from action import set_to, smooth_to, linear_to

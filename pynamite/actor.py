@@ -106,14 +106,15 @@ class Stuff(Actor):
 class TextBox(Actor):
     """
     """
-    def __init__(self, text):
+    def __init__(self, text, font="Helvetica"):
         super( TextBox, self ).__init__( )
 
         self.text = text
+        self.font = font
         
     def _draw(self, cr, t=None):
 
-        cr.select_font_face('Georgia',
+        cr.select_font_face(self.font,
                             cairo.FONT_SLANT_NORMAL,
                             cairo.FONT_WEIGHT_BOLD)
         cr.set_font_size(0.1)

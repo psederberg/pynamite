@@ -10,7 +10,7 @@ from pynamite.actor import TextBox
 def scene1():
     # define some actors
     x = TextBox("Pynamite")
-    y = TextBox("Rocks!!!")
+    y = TextBox("Rocks!!!", "Georgia")
 
     # tell the first actor to enter
     enter(x)
@@ -29,12 +29,13 @@ def scene1():
 
     # wait for input
     pause()
+    #wait(1.0)
 
     # last actor leaves
     with parallel():
         fadeout(2.0,y)
-        y.set_cx(1.0,duration=2.0,func="linear")
-        y.set_cy(1.0,duration=2.0,func="linear")
+        y.set_cx(1.0,duration=2.0,func="smooth")
+        y.set_cy(1.0,duration=2.0,func="smooth")
     
     pause()
 # add that scene to the play

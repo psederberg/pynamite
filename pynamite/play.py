@@ -151,14 +151,14 @@ class Play(Screen):
     def pause(self):
         # we're paused
         self._paused = True
-        while self._paused:
-            self._process_events()
+        #while self._paused:
+        #    self._process_events()
         #raw_input()
 
     def _process_active_actions(self):
         """
         """
-        if len(self._active_actions) > 0:
+        if len(self._active_actions) > 0 and not self._paused:
             cur_time = time.time()
             to_remove = []
             for i,action in enumerate(self._active_actions):
