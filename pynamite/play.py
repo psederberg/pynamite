@@ -66,6 +66,7 @@ class Play(Screen):
                              self._process_active_actions)
 
     def _show(self, start_scene=None):
+        self._show_started = True
         if not start_scene is None:
             self._current_scene = start_scene
 
@@ -96,7 +97,6 @@ class Play(Screen):
                 # unpause if paused
                 self._paused = False
             elif self._show_started == False:
-                self._show_started = True
                 self._show()
         elif event.hardware_keycode in [36]:
             print self._active_actions
