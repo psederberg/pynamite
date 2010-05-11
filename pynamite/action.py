@@ -79,22 +79,6 @@ def smooth(actor, var, val, duration=1.0):
                                duration=duration,
                                func="smooth"))
 
-# classes for property setting
-class set_to(object):
-    def __init__(self, val, duration=1.0, func="linear"):
-        self.val = val
-        self.duration = duration
-        self.func = func
-class smooth_to(set_to):
-    def __init__(self, val, duration=1.0):
-        self.val = val
-        self.duration = duration
-        self.func = "smooth"
-class linear_to(set_to):
-    def __init__(self, val, duration=1.0):
-        self.val = val
-        self.duration = duration
-        self.func = "linear"
 
 class ActionList(Action):
     def __init__(self):
@@ -200,16 +184,13 @@ def fadein(duration, *actors):
         enter(*actors)
         with parallel():
             for actor in actors:
-                #actor.set_opacity(1.0, duration=duration, func="linear")
-                actor.opacity = linear_to(1.0, duration=duration)
-
+                actor.set_opacity(1.0, duration=duration, func="linear")
 
 def fadeout(duration, *actors):
     with serial():
         with parallel():
             for actor in actors:
-                #actor.set_opacity(0.0, duration=duration, func="linear")
-                actor.opacity = linear_to(0.0, duration=duration)
+                actor.set_opacity(0.0, duration=duration, func="linear")
         leave(*actors)
 
 def add_scene(scene):

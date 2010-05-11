@@ -5,13 +5,15 @@
 from __future__ import with_statement
 
 from pynamite import *
-from pynamite.actor import TextBox
+from pynamite.actor import TextBox,GradientBox
 
 def scene1():
     # define some actors
     x = TextBox("Pynamite")
     y = TextBox("Rocks!!!", "Georgia")
-
+    b = GradientBox()
+    b.enter()
+    
     # tell the first actor to enter
     enter(x)
 
@@ -36,34 +38,32 @@ def scene1():
         fadeout(2.0,y)
         y.set_cx(1.0,duration=2.0,func="smooth")
         y.set_cy(1.0,duration=2.0,func="smooth")
+        with serial():
+            wait(1.0)
+            b.fadeout(2.0)
+
     
-    pause()
 # add that scene to the play
 add_scene(scene1)
 
 def scene2():
     # define the actor
-    x = TextBox("Yes, it Rocks!!!")
+    x = TextBox("Yes, it Rocks!!!", "Georgia")
+    b = GradientBox()
+    b.fadein(1.0)
     
     # set its opacity to 0.0
-    #x.set_opacity(0.0)
-    x.opacity = 0.0
+    x.set_opacity(0.0)
     
     # have it enter (but remember it's still not visible)
     x.enter()
     
     # have it become visible, but in a fancy way
-    # x.set_opacity(.5, duration=.5, func="smooth")
-    # x.set_opacity(.25, duration=.25, func="smooth")
-    # x.set_opacity(.75, duration=.5, func="smooth")
-    # x.set_opacity(.5, duration=.25, func="smooth")
-    # x.set_opacity(1.0, duration=.5, func="smooth")
-
-    x.opacity = smooth_to(.5, duration=.5)
-    x.opacity = smooth_to(.25, duration=.25)
-    x.opacity = smooth_to(.75, duration=.5)
-    x.opacity = smooth_to(.5, duration=.25)
-    x.opacity = smooth_to(1.0, duration=.5)
+    x.set_opacity(.5, duration=.5, func="smooth")
+    x.set_opacity(.25, duration=.25, func="smooth")
+    x.set_opacity(.75, duration=.5, func="smooth")
+    x.set_opacity(.5, duration=.25, func="smooth")
+    x.set_opacity(1.0, duration=.5, func="smooth")
 
     # wait for input
     pause()

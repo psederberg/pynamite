@@ -2,74 +2,44 @@
 #
 
 import cairo
+import pangocairo
 
 from math import pi, sqrt
 
 from play import global_play
 from action import Set, enter, leave, fadein, fadeout
-from action import set_to, smooth_to, linear_to
-
-def make_property(obj, var, doc=""):
-    prop = property(lambda obj: getattr(obj,"_"+var),
-                    lambda obj,value: \
-                    isinstance(value,set_to) and \
-                    obj.play.add_action(Set(obj,"_"+var,value.val,
-                                            duration=value.duration,
-                                            func=value.func)) or \
-                    obj.play.add_action(Set(obj,"_opacity",value,
-                                            duration=0.0,
-                                            func="linear")),
-                    doc=doc)
-    return prop
-                    
 
 class Actor(object):
     """
     """
     play = global_play
 
-    _opacity = 1.0
+    opacity = 1.0
         
     cx = .5
     cy = .5
     
     def __init__(self):
         self.rect = None
-        
-    def get_opacity(self):
-        return self._opacity
-    def set_opacity(self, value):
-        if isinstance(value,set_to):
-            self.play.add_action(Set(self,"_opacity",value.val,
-                                     duration=value.duration,
-                                     func=value.func))
-        else:
-            self.play.add_action(Set(self,"_opacity",value,
-                                     duration=0.0,
-                                     func="linear"))
-
-    opacity = property(get_opacity, set_opacity,
-                       doc="Opacity of the actor.")
-    # opacity = make_property(self,"opacity",
-    #                         doc="Opacity of the actor.")
     
-    def _draw(self,cr,t=None):
+    def _draw(self,cr):
         """
         """
         raise NotImplemented()
 
     # wrap setting of vars in actions
-    def set_opacity_old(self, val, duration=0.0,func="linear"):
-        self.play.add_action(Set(self,"opacity",val,
+    def set(self, var, val, duration=0.0, func="linear"):
+        self.play.add_action(Set(self,var,val,
                                  duration=duration, func=func))
+        
+    def set_opacity(self, val, duration=0.0,func="linear"):
+        self.set("opacity", val, duration=duration, func=func)
 
-    def set_cx(self, val, duration=0.0,func="linear"):
-        self.play.add_action(Set(self,"cx",val,
-                                 duration=duration, func=func))
+    def set_cx(self, val, duration=0.0, func="linear"):
+        self.set("cx", val, duration=duration, func=func)
 
-    def set_cy(self, val, duration=0.0,func="linear"):
-        self.play.add_action(Set(self,"cy",val,
-                                 duration=duration, func=func))
+    def set_cy(self, val, duration=0.0, func="linear"):
+        self.set("cy", val, duration=duration, func=func)
 
     def enter(self):
         enter(self)
@@ -86,7 +56,7 @@ class Actor(object):
 
 
 class Stuff(Actor):
-    def _draw(self, cr, t=None):
+    def _draw(self, cr):
 
         cr.set_line_width(0.01)
 
@@ -112,8 +82,9 @@ class TextBox(Actor):
         self.text = text
         self.font = font
         
-    def _draw(self, cr, t=None):
+    def _draw(self, cr):
 
+        
         cr.select_font_face(self.font,
                             cairo.FONT_SLANT_NORMAL,
                             cairo.FONT_WEIGHT_BOLD)
@@ -133,14 +104,12 @@ class TextBox(Actor):
 
 class GradientBox(Actor):
 
-    def _draw(self, cr, t=None):
-
-        cr.scale(self.width, self.height)
+    def _draw(self, cr):
 
         # gradient
         radial = cairo.RadialGradient(0.25, 0.25, 0.1,  0.5, 0.5, 0.5) #gradient
-        radial.add_color_stop_rgb(0,  1.0, 0.8, 0.8)                   #gradient
-        radial.add_color_stop_rgb(1,  0.9, 0.0, 0.0)                   #gradient
+        radial.add_color_stop_rgba(0,  1.0, 0.8, 0.8, self.opacity)                   #gradient
+        radial.add_color_stop_rgba(1,  0.9, 0.0, 0.0, self.opacity)                   #gradient
                                                                        #gradient
         for i in range(1, 10):                                         #gradient
             for j in range(1, 10):                                     #gradient
@@ -149,11 +118,11 @@ class GradientBox(Actor):
         cr.fill()                                                      #gradient
                                                                        #gradient
         linear = cairo.LinearGradient(0.25, 0.35, 0.75, 0.65)          #gradient
-        linear.add_color_stop_rgba(0.00,  1, 1, 1, 0)                  #gradient
-        linear.add_color_stop_rgba(0.25,  0, 1, 0, 0.5)                #gradient
-        linear.add_color_stop_rgba(0.50,  1, 1, 1, 0)                  #gradient
-        linear.add_color_stop_rgba(0.75,  0, 0, 1, 0.5)                #gradient
-        linear.add_color_stop_rgba(1.00,  1, 1, 1, 0)                  #gradient
+        linear.add_color_stop_rgba(0.00,  1, 1, 1, 0*self.opacity)                  #gradient
+        linear.add_color_stop_rgba(0.25,  0, 1, 0, 0.5*self.opacity)                #gradient
+        linear.add_color_stop_rgba(0.50,  1, 1, 1, 0*self.opacity)                  #gradient
+        linear.add_color_stop_rgba(0.75,  0, 0, 1, 0.5*self.opacity)                #gradient
+        linear.add_color_stop_rgba(1.00,  1, 1, 1, 0*self.opacity)                  #gradient
                                                                        #gradient
         cr.rectangle(0.0, 0.0, 1, 1)                                   #gradient
         cr.set_source(linear)                                          #gradient
