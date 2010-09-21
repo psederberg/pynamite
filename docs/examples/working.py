@@ -16,7 +16,7 @@ def scene1():
     
     # tell the first actor to enter
     enter(x)
-
+    
     # wait for a keypress to continue
     pause()
 

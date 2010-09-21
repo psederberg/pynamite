@@ -73,6 +73,7 @@ class Stuff(Actor):
         cr.set_source_rgb(0, 0.6, 0)
         cr.stroke()
 
+
 class TextBox(Actor):
     """
     """
